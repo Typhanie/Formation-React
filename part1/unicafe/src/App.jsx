@@ -55,7 +55,6 @@ const App = () => {
   const [bad, setBad] = useState(0);
 
   const handleFeedback = (setter, value) => {
-    console.log('value now', value);
     setter(value);
   };
 
