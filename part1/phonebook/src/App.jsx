@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import Filter from './Filter'
-import PersonForm from './PersonForm'
-import Persons from './Persons'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 import personsService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [searchPerson, setSearchPerson] = useState('')
+  const [notification, setNotification] = useState({ message: "", type: "" });
 
   useEffect(() => {
     personsService
@@ -42,6 +44,11 @@ const App = () => {
       );  
       if (confirmUpdate) {
           handleUpdate(existingPerson.id, personObject);
+          setNotification({ message: `${newName} a été modifié!`, type: "success" });
+          setTimeout(() => {
+            setNotification({ message: "", type: "" })
+          }, 5000)
+
           resetForm();
       }
       return;
@@ -51,6 +58,10 @@ const App = () => {
       .create(personObject)
       .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson));
+          setNotification({ message: `${newName} a été ajouté!`, type: "success" });
+          setTimeout(() => {
+            setNotification({ message: "", type: "" })
+          }, 5000)
           resetForm();
       })
   }
@@ -84,8 +95,12 @@ const App = () => {
         setPersons(persons.filter(person => person.id !== id));
       })
       .catch(error => {
+        const person = persons.find(person => person.id !== id)
         console.error("Erreur lors de la suppression :", error);
-        alert("Impossible de supprimer la personne !");
+          setNotification({ message: `${person.name} a été supprimé du serveur`, type: "error" });
+          setTimeout(() => {
+            setNotification({ message: "", type: "" })
+          }, 5000)
       });
 
   };
@@ -104,6 +119,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification.message} type={notification.type} />
       <Filter searchPerson={searchPerson} handleSearchPerson={handleSearchPerson} />
       <h3>Add a new</h3>
       <PersonForm 
